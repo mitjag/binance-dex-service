@@ -45,23 +45,27 @@ public class RestService {
         return "REST service";
     }
     
-    @RequestMapping("/wallets")
-    public List<String> wallets() {
-        return new ArrayList<>();
-    }
-    
     @RequestMapping("/newOrder")
-    public String newOrder(NewOrder newOrder, Wallet wallet, TransactionOption option) {
+    public String newOrder(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pin") Integer pin,
+            NewOrder newOrder, Wallet wallet, TransactionOption option) {
         log.info("New Order");
         return "newOrder";
     }
     
-    public String vote(Vote vote, Wallet wallet, TransactionOption options) {
+    public String vote(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pin") Integer pin,
+            Vote vote, Wallet wallet, TransactionOption options) {
         return "vote";
     }
     
     @RequestMapping("/cancelOrder")
-    public String cancelOrder(CancelOrder cancelOrder, Wallet wallet, TransactionOption options) {
+    public String cancelOrder(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pin") Integer pin,
+            CancelOrder cancelOrder, Wallet wallet, TransactionOption options) {
         log.info("Cancel Order");
         return "cancelOrder";
     }
@@ -92,17 +96,26 @@ public class RestService {
     }
     
     @RequestMapping("/multiTransfer")
-    public String multiTransfer(MultiTransfer multiTransfer, Wallet wallet, TransactionOption options) {
+    public String multiTransfer(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pin") Integer pin,
+            MultiTransfer multiTransfer, Wallet wallet, TransactionOption options) {
         return "multiTransfer";
     }
     
     @RequestMapping("/freeze")
-    public String freeze(TokenFreeze freeze, Wallet wallet, TransactionOption options) {
+    public String freeze(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pin") Integer pin,
+            TokenFreeze freeze, Wallet wallet, TransactionOption options) {
         return "freeze";
     }
     
     @RequestMapping("/unfreeze")
-    public String unfreeze(TokenUnfreeze unfreeze, Wallet wallet, TransactionOption options) {
+    public String unfreeze(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pin") Integer pin,
+            TokenUnfreeze unfreeze, Wallet wallet, TransactionOption options) {
         return "unfreeze";
     }
     
