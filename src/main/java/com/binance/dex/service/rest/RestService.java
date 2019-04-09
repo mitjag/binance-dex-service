@@ -74,7 +74,6 @@ public class RestService {
             @RequestParam(name = "toAddress") String toAddress,
             @RequestParam(name = "amount") String amount,
             @RequestParam(name = "memo", required = false ) String memo) throws DexServiceException {
-        
         Wallet wallet = configuration.getWallet(name, pin);
         
         Transfer transfer = new Transfer();
@@ -108,13 +107,18 @@ public class RestService {
     }
     
     @RequestMapping("/broadcast")
-    public List<TransactionMetadata> broadcast(@RequestParam(name = "payload") String payload) {
+    public List<TransactionMetadata> broadcast(
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "pin") Integer pin,
+            @RequestParam(name = "payload") String payload) throws DexServiceException {
+        Wallet wallet = configuration.getWallet(name, pin);
+        
         RequestBody requestBody = RequestBody.create(MEDIA_TYPE, payload);
         BinanceDexApi binanceDexApi = BinanceDexApiClientGenerator.createService(BinanceDexApi.class, configuration.getBinanceDexEnvironment().getBaseUrl());
         List<TransactionMetadata> metadatas = BinanceDexApiClientGenerator.executeSync(binanceDexApi.broadcast(true, requestBody));
-        /*if (!metadatas.isEmpty() && metadatas.get(0).isOk()) {
+        if (!metadatas.isEmpty() && metadatas.get(0).isOk()) {
             wallet.increaseAccountSequence();
-        }*/
+        }
         return metadatas;
     }
 }
