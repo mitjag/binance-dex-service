@@ -91,6 +91,7 @@ public class Application implements ApplicationRunner {
                     multiWallets.add(multiWallet);
                     log.info("Wallet loaded name: {} address: {}", multiWallet.getName(), multiWallet.getWallet().getAddress());
                 }
+                configuration.loadWallets(multiWallets);
             } catch (IOException ex) {
                 log.error("IOException ex: {}", ex.getMessage(), ex);
                 throw new IllegalArgumentException(ex.getMessage());

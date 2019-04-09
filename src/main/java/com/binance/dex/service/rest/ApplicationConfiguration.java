@@ -12,7 +12,7 @@ public class ApplicationConfiguration implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
-    private Map<String, MultiWallet> wallets = new HashMap<>();
+    private Map<String, MultiWallet> wallets;
     
     private BinanceDexEnvironment binanceDexEnvironment;
     
@@ -40,6 +40,14 @@ public class ApplicationConfiguration implements Serializable {
         } else {
             throw new DexServiceException("Wrong pin");
         }
+    }
+    
+    public Map<String, MultiWallet> getWallets() {
+        return wallets;
+    }
+
+    public void setWallets(Map<String, MultiWallet> wallets) {
+        this.wallets = wallets;
     }
     
     public BinanceDexEnvironment getBinanceDexEnvironment() {
