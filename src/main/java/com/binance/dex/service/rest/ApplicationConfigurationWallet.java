@@ -10,6 +10,8 @@ public class ApplicationConfigurationWallet implements Serializable {
     
     private Integer pin;
     
+    private String ipWhitelist;
+    
     private String phrase;
     
     private String privateKey;
@@ -28,6 +30,14 @@ public class ApplicationConfigurationWallet implements Serializable {
     
     public void setPin(Integer pin) {
         this.pin = pin;
+    }
+    
+    public String getIpWhitelist() {
+        return ipWhitelist;
+    }
+    
+    public void setIpWhitelist(String ipWhitelist) {
+        this.ipWhitelist = ipWhitelist;
     }
     
     public String getPhrase() {

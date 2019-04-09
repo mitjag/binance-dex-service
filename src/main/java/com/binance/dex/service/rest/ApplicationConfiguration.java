@@ -26,19 +26,21 @@ public class ApplicationConfiguration implements Serializable {
         }
     }
     
-    public Wallet getWallet(String name, Integer pin) throws DexServiceException {
+    public Wallet getWallet(String name, Integer pin, String ip) throws DexServiceException {
         MultiWallet multiWallet = wallets.get(name);
         if (pin == null) {
             throw new DexServiceException("Argument pin is null");
         }
+        if (ip == null) {
+            throw new DexServiceException("Argument ip is null");
+        }
         if (multiWallet == null) {
             throw new DexServiceException("Wallet not found name: " + name);
         }
-        
-        if (pin.equals(multiWallet.getPin())) {
+        if (pin.equals(multiWallet.getPin()) && multiWallet.getIpWhitelist().contains(ip)) {
             return multiWallet.getWallet();
         } else {
-            throw new DexServiceException("Wrong pin");
+            throw new DexServiceException("Wrong pin or ip");
         }
     }
     

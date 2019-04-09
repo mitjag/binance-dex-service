@@ -65,6 +65,10 @@ public class Application implements ApplicationRunner {
                 throw new IllegalArgumentException("wallet.pin missing");
             }
             int walletPin = Integer.parseInt(walletPinString);
+            String walletIpwhitelist = env.getProperty("wallet.ipWhitelist");
+            if (walletIpwhitelist == null) {
+                throw new IllegalArgumentException("wallet.ipWhitelist missing");
+            }
             String walletPhrase = env.getProperty("wallet.phrase");
             String walletPrivateKey = env.getProperty("wallet.privateKey");
             if (walletPhrase == null && walletPrivateKey == null) {
@@ -72,7 +76,7 @@ public class Application implements ApplicationRunner {
             }
             
             try {
-                MultiWallet multiWallet = MultiWallet.createMultiWallet(walletName, walletPin, walletPhrase, walletPrivateKey, configuration.getBinanceDexEnvironment());
+                MultiWallet multiWallet = MultiWallet.createMultiWallet(walletName, walletPin, walletIpwhitelist, walletPhrase, walletPrivateKey, configuration.getBinanceDexEnvironment());
                 configuration.loadWallets(Arrays.asList(multiWallet));
                 log.info("Wallet loaded name: {} address: {}", multiWallet.getName(), multiWallet.getWallet().getAddress());
             } catch (IOException ex) {
@@ -87,7 +91,7 @@ public class Application implements ApplicationRunner {
                 List<ApplicationConfigurationWallet> wallets = om.readValue(new File(walletFile), new TypeReference<List<ApplicationConfigurationWallet>>() {});
                 List<MultiWallet> multiWallets = new ArrayList<MultiWallet>();
                 for (ApplicationConfigurationWallet wallet : wallets) {
-                    MultiWallet multiWallet = MultiWallet.createMultiWallet(wallet.getName(), wallet.getPin(), wallet.getPhrase(), wallet.getPrivateKey(), configuration.getBinanceDexEnvironment());
+                    MultiWallet multiWallet = MultiWallet.createMultiWallet(wallet.getName(), wallet.getPin(), wallet.getIpWhitelist(), wallet.getPhrase(), wallet.getPrivateKey(), configuration.getBinanceDexEnvironment());
                     multiWallets.add(multiWallet);
                     log.info("Wallet loaded name: {} address: {}", multiWallet.getName(), multiWallet.getWallet().getAddress());
                 }

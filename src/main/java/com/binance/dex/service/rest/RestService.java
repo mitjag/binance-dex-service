@@ -1,7 +1,8 @@
 package com.binance.dex.service.rest;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,17 @@ public class RestService {
     
     @Autowired
     private TransactionLogic transactionLogic;
+    
+    private static String getClientIp(HttpServletRequest request) {
+        String remoteAddr = "";
+        if (request != null) {
+            remoteAddr = request.getHeader("X-FORWARDED-FOR");
+            if (remoteAddr == null || "".equals(remoteAddr)) {
+                remoteAddr = request.getRemoteAddr();
+            }
+        }
+        return remoteAddr;
+    }
     
     @RequestMapping("/")
     public String index() {
@@ -77,8 +89,10 @@ public class RestService {
             @RequestParam(name = "coin") String coin,
             @RequestParam(name = "toAddress") String toAddress,
             @RequestParam(name = "amount") String amount,
-            @RequestParam(name = "memo", required = false ) String memo) throws DexServiceException {
-        Wallet wallet = configuration.getWallet(name, pin);
+            @RequestParam(name = "memo", required = false ) String memo,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         Transfer transfer = new Transfer();
         transfer.setFromAddress(wallet.getAddress());
@@ -91,7 +105,7 @@ public class RestService {
             options.setMemo(memo);
         }        
         String transferPayload = transactionLogic.transfer(wallet, transfer, options);
-        log.info("Transfer transferPayload: {}", transferPayload);
+        log.info("Transfer clientIp: {} transferPayload: {}", clientIp, transferPayload);
         return transferPayload;
     }
     
@@ -123,8 +137,10 @@ public class RestService {
     public List<TransactionMetadata> broadcast(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
-            @RequestParam(name = "payload") String payload) throws DexServiceException {
-        Wallet wallet = configuration.getWallet(name, pin);
+            @RequestParam(name = "payload") String payload,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         RequestBody requestBody = RequestBody.create(MEDIA_TYPE, payload);
         BinanceDexApi binanceDexApi = BinanceDexApiClientGenerator.createService(BinanceDexApi.class, configuration.getBinanceDexEnvironment().getBaseUrl());
