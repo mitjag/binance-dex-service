@@ -71,9 +71,9 @@ public class RestService {
     }
     
     @RequestMapping("/")
-    public String index() {
-        log.info("index requested");
-        log.info("env: {}", configuration.getBinanceDexEnvironment());
+    public String index(HttpServletRequest request) {
+        String clientIp = getClientIp(request);
+        log.info("index clientIp: {}", clientIp);
         return "REST service";
     }
     
@@ -81,15 +81,37 @@ public class RestService {
     public String newOrder(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
-            NewOrder newOrder, Wallet wallet, TransactionOption option) {
-        log.info("New Order");
+            @RequestParam(name = "memo", required = false) String memo,
+            @RequestParam(name = "source", required = false) Long source,
+            @RequestParam(name = "data", required = false) String data,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
+        
+        NewOrder newOrder = new NewOrder();
+        
+        TransactionOption options = getTransacationOption(memo, source, data);
+        String payload = transactionLogic.newOrder(wallet, newOrder, options);
+        log.info("New order clientIp: {} payload: {}", clientIp, payload);
         return "newOrder";
     }
     
+    @RequestMapping("/vote")
     public String vote(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
-            Vote vote, Wallet wallet, TransactionOption options) {
+            @RequestParam(name = "memo", required = false) String memo,
+            @RequestParam(name = "source", required = false) Long source,
+            @RequestParam(name = "data", required = false) String data,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
+        
+        Vote vote = new Vote();
+        
+        TransactionOption options = getTransacationOption(memo, source, data);
+        String payload = transactionLogic.vote(wallet, vote, options);
+        log.info("Vote clientIp: {} payload: {}", clientIp, payload);
         return "vote";
     }
     
@@ -97,8 +119,18 @@ public class RestService {
     public String cancelOrder(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
-            CancelOrder cancelOrder, Wallet wallet, TransactionOption options) {
-        log.info("Cancel Order");
+            @RequestParam(name = "memo", required = false) String memo,
+            @RequestParam(name = "source", required = false) Long source,
+            @RequestParam(name = "data", required = false) String data,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
+        
+        CancelOrder cancelOrder = new CancelOrder();
+        
+        TransactionOption options = getTransacationOption(memo, source, data);
+        String payload = transactionLogic.cancelOrder(wallet, cancelOrder, options);
+        log.info("Cancel order clientIp: {} payload: {}", clientIp, payload);
         return "cancelOrder";
     }
     
@@ -112,7 +144,6 @@ public class RestService {
             @RequestParam(name = "memo", required = false) String memo,
             @RequestParam(name = "source", required = false) Long source,
             @RequestParam(name = "data", required = false) String data,
-            @RequestParam(name = "detail", required = false, defaultValue = "false") Boolean detail,
             HttpServletRequest request) throws DexServiceException {
         String clientIp = getClientIp(request);
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
@@ -124,16 +155,27 @@ public class RestService {
         transfer.setAmount(amount);
         
         TransactionOption options = getTransacationOption(memo, source, data);
-        String transferPayload = transactionLogic.transfer(wallet, transfer, options);
-        log.info("Transfer clientIp: {} transferPayload: {}", clientIp, transferPayload);
-        return transferPayload;
+        String payload = transactionLogic.transfer(wallet, transfer, options);
+        log.info("Transfer clientIp: {} payload: {}", clientIp, payload);
+        return payload;
     }
     
     @RequestMapping("/multiTransfer")
     public String multiTransfer(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
-            MultiTransfer multiTransfer, Wallet wallet, TransactionOption options) {
+            @RequestParam(name = "memo", required = false) String memo,
+            @RequestParam(name = "source", required = false) Long source,
+            @RequestParam(name = "data", required = false) String data,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
+        
+        MultiTransfer multiTransfer = new MultiTransfer();
+        
+        TransactionOption options = getTransacationOption(memo, source, data);
+        String payload = transactionLogic.multiTransfer(wallet, multiTransfer, options);
+        log.info("Multi transfer clientIp: {} payload: {}", clientIp, payload);
         return "multiTransfer";
     }
     
@@ -141,7 +183,18 @@ public class RestService {
     public String freeze(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
-            TokenFreeze freeze, Wallet wallet, TransactionOption options) {
+            @RequestParam(name = "memo", required = false) String memo,
+            @RequestParam(name = "source", required = false) Long source,
+            @RequestParam(name = "data", required = false) String data,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
+        
+        TokenFreeze freeze = new TokenFreeze();
+        
+        TransactionOption options = getTransacationOption(memo, source, data);
+        String payload = transactionLogic.freeze(wallet, freeze, options);
+        log.info("Freeze clientIp: {} payload: {}", clientIp, payload);
         return "freeze";
     }
     
@@ -149,7 +202,18 @@ public class RestService {
     public String unfreeze(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
-            TokenUnfreeze unfreeze, Wallet wallet, TransactionOption options) {
+            @RequestParam(name = "memo", required = false) String memo,
+            @RequestParam(name = "source", required = false) Long source,
+            @RequestParam(name = "data", required = false) String data,
+            HttpServletRequest request) throws DexServiceException {
+        String clientIp = getClientIp(request);
+        Wallet wallet = configuration.getWallet(name, pin, clientIp);
+        
+        TokenUnfreeze unfreeze = new TokenUnfreeze();
+        
+        TransactionOption options = getTransacationOption(memo, source, data);
+        String payload = transactionLogic.unfreeze(wallet, unfreeze, options);
+        log.info("Unfreeze clientIp: {} payload: {}", clientIp, payload);
         return "unfreeze";
     }
     
