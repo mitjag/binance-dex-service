@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,24 @@ public class RestService {
         return remoteAddr;
     }
     
+    private static TransactionOption getTransacationOption(String memo, Long source, String data) throws DexServiceException {
+        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
+        if (memo != null) {
+            options.setMemo(memo);
+        }
+        if (source != null) {
+            options.setSource(source);
+        }
+        if (data != null) {
+            try {
+                options.setData(Hex.decodeHex(data));
+            } catch (DecoderException ex) {
+                throw new DexServiceException("Error in parameter data (should be in hexadecimal format). " + ex.getMessage(), ex);
+            }
+        }
+        return options;
+    }
+    
     @RequestMapping("/")
     public String index() {
         log.info("index requested");
@@ -89,7 +109,10 @@ public class RestService {
             @RequestParam(name = "coin") String coin,
             @RequestParam(name = "toAddress") String toAddress,
             @RequestParam(name = "amount") String amount,
-            @RequestParam(name = "memo", required = false ) String memo,
+            @RequestParam(name = "memo", required = false) String memo,
+            @RequestParam(name = "source", required = false) Long source,
+            @RequestParam(name = "data", required = false) String data,
+            @RequestParam(name = "detail", required = false, defaultValue = "false") Boolean detail,
             HttpServletRequest request) throws DexServiceException {
         String clientIp = getClientIp(request);
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
@@ -100,10 +123,7 @@ public class RestService {
         transfer.setCoin(coin);
         transfer.setAmount(amount);
         
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        if (memo != null) {
-            options.setMemo(memo);
-        }        
+        TransactionOption options = getTransacationOption(memo, source, data);
         String transferPayload = transactionLogic.transfer(wallet, transfer, options);
         log.info("Transfer clientIp: {} transferPayload: {}", clientIp, transferPayload);
         return transferPayload;
