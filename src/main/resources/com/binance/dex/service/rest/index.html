@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Binance DEX REST service</title>
+</head>
+<body>
+
+<h1>Binance DEX REST service</h1><br/>
+
+<h2>GET methods</h2>
+
+<h3>/newOrder</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>String symbol</li>
+<li>String orderType</li>
+<li>String side</li>
+<li>String price</li>
+<li>String quantity</li>
+<li>String timeInForce</li>
+<li>optional String memo</li>
+<li>optional Long source</li>
+<li>optional String data</li>
+</ul>
+
+<h3>/vote</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>Long proposalId</li>
+<li>Integer option</li>
+<li>optional String memo</li>
+<li>optional Long source</li>
+<li>optional String data</li>
+</ul>
+
+<h3>/cancelOrder</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>String symbol</li>
+<li>String refId</li>
+<li>optional String memo</li>
+<li>optional Long source</li>
+<li>optional String data</li>
+</ul>
+
+<h3>/transfer</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>String coin</li>
+<li>String toAddress</li>
+<li>String amount</li>
+<li>optional String memo</li>
+<li>optional Long source</li>
+<li>optional String data</li>
+</ul>
+
+<h3>/multiTransfer</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>String multiTransfer, expected string format is (+ splits different addresses, after address repeat coin and amount pairs): address,coin,amount,coin,amount+address,coin,amount,...</li>
+<li>optional String memo</li>
+<li>optional Long source</li>
+<li>optional String data</li>
+</ul>
+
+<h3>/freeze</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>String symbol</li>
+<li>String amount</li>
+<li>optional String memo</li>
+<li>optional Long source</li>
+<li>optional String data</li>
+</ul>
+
+<h3>/unfreeze</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>String symbol</li>
+<li>String amount</li>
+<li>optional String memo</li>
+<li>optional Long source</li>
+<li>optional String data</li>
+</ul>
+
+<h2>POST method</h2>
+
+<h3>/broadcast</h3>
+Query parameters:
+<ul>
+<li>String name</li>
+<li>Integer pin</li>
+<li>String payload</li>
+</ul>
+</body>
+</html>

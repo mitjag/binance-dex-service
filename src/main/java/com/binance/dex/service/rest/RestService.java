@@ -1,5 +1,8 @@
 package com.binance.dex.service.rest;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,10 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.binance.dex.api.client.BinanceDexApi;
 import com.binance.dex.api.client.BinanceDexApiClientGenerator;
 import com.binance.dex.api.client.Wallet;
+import com.binance.dex.api.client.domain.OrderSide;
+import com.binance.dex.api.client.domain.OrderType;
+import com.binance.dex.api.client.domain.TimeInForce;
 import com.binance.dex.api.client.domain.TransactionMetadata;
 import com.binance.dex.api.client.domain.broadcast.CancelOrder;
 import com.binance.dex.api.client.domain.broadcast.MultiTransfer;
 import com.binance.dex.api.client.domain.broadcast.NewOrder;
+import com.binance.dex.api.client.domain.broadcast.Output;
+import com.binance.dex.api.client.domain.broadcast.OutputToken;
 import com.binance.dex.api.client.domain.broadcast.TokenFreeze;
 import com.binance.dex.api.client.domain.broadcast.TokenUnfreeze;
 import com.binance.dex.api.client.domain.broadcast.TransactionOption;
@@ -71,16 +79,29 @@ public class RestService {
     }
     
     @RequestMapping("/")
-    public String index(HttpServletRequest request) {
+    public byte[] index(HttpServletRequest request) {
         String clientIp = getClientIp(request);
         log.info("index clientIp: {}", clientIp);
-        return "REST service";
+        InputStream is = RestService.class.getResourceAsStream("index.html");
+        byte[] bytes = new byte[0];
+        try {
+            bytes = new byte[is.available()];
+            is.read(bytes, 0, is.available());
+        } catch (IOException ex) {
+        }
+        return bytes;
     }
     
     @RequestMapping("/newOrder")
     public String newOrder(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
+            @RequestParam(name = "symbol") String symbol,
+            @RequestParam(name = "orderType") String orderType,
+            @RequestParam(name = "side") String side,
+            @RequestParam(name = "price") String price,
+            @RequestParam(name = "quantity") String quantity,
+            @RequestParam(name = "timeInForce") String timeInForce,
             @RequestParam(name = "memo", required = false) String memo,
             @RequestParam(name = "source", required = false) Long source,
             @RequestParam(name = "data", required = false) String data,
@@ -89,6 +110,11 @@ public class RestService {
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         NewOrder newOrder = new NewOrder();
+        newOrder.setSymbol(symbol);
+        newOrder.setOrderType(OrderType.valueOf(orderType));
+        newOrder.setSide(OrderSide.valueOf(side));
+        newOrder.setPrice(price);
+        newOrder.setTimeInForce(TimeInForce.valueOf(timeInForce));
         
         TransactionOption options = getTransacationOption(memo, source, data);
         String payload = transactionLogic.newOrder(wallet, newOrder, options);
@@ -100,6 +126,8 @@ public class RestService {
     public String vote(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
+            @RequestParam(name = "proposalId") Long proposalId,
+            @RequestParam(name = "option") Integer option,
             @RequestParam(name = "memo", required = false) String memo,
             @RequestParam(name = "source", required = false) Long source,
             @RequestParam(name = "data", required = false) String data,
@@ -108,6 +136,8 @@ public class RestService {
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         Vote vote = new Vote();
+        vote.setProposalId(proposalId);
+        vote.setOption(option);
         
         TransactionOption options = getTransacationOption(memo, source, data);
         String payload = transactionLogic.vote(wallet, vote, options);
@@ -119,6 +149,8 @@ public class RestService {
     public String cancelOrder(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
+            @RequestParam(name = "symbol") String symbol,
+            @RequestParam(name = "refId") String refId,
             @RequestParam(name = "memo", required = false) String memo,
             @RequestParam(name = "source", required = false) Long source,
             @RequestParam(name = "data", required = false) String data,
@@ -127,6 +159,8 @@ public class RestService {
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         CancelOrder cancelOrder = new CancelOrder();
+        cancelOrder.setSymbol(symbol);
+        cancelOrder.setRefId(refId);
         
         TransactionOption options = getTransacationOption(memo, source, data);
         String payload = transactionLogic.cancelOrder(wallet, cancelOrder, options);
@@ -164,6 +198,7 @@ public class RestService {
     public String multiTransfer(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
+            @RequestParam(name = "multiTransfer") String multiTransferString,
             @RequestParam(name = "memo", required = false) String memo,
             @RequestParam(name = "source", required = false) Long source,
             @RequestParam(name = "data", required = false) String data,
@@ -172,6 +207,33 @@ public class RestService {
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         MultiTransfer multiTransfer = new MultiTransfer();
+        multiTransfer.setFromAddress(wallet.getAddress());
+        List<Output> outputs = new ArrayList<>();
+        multiTransfer.setOutputs(outputs );
+        
+        // <address>,<coin>,<amount>,<coin>,<amount>+<address>,<coin>,<amount>...
+        String[] splits = multiTransferString.split("+");
+        for (String split : splits) {
+            Output output = new Output();
+            String[] parts = split.split(",");
+            List<OutputToken> tokens = new ArrayList<>();
+            output.setTokens(tokens);
+            OutputToken outputToken = null;
+            for (int i = 0; i < parts.length; i++) {
+                if (i == 0) {
+                    output.setAddress(parts[i]);
+                } else {
+                    if (i % 2 == 1) {
+                        outputToken = new OutputToken();
+                        outputToken.setCoin(parts[i]);
+                    } else {
+                        outputToken.setAmount(parts[i]);
+                        tokens.add(outputToken);
+                    }
+                }
+            }
+            outputs.add(output);
+        }
         
         TransactionOption options = getTransacationOption(memo, source, data);
         String payload = transactionLogic.multiTransfer(wallet, multiTransfer, options);
@@ -183,6 +245,8 @@ public class RestService {
     public String freeze(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
+            @RequestParam(name = "symbol") String symbol,
+            @RequestParam(name = "amount") String amount,
             @RequestParam(name = "memo", required = false) String memo,
             @RequestParam(name = "source", required = false) Long source,
             @RequestParam(name = "data", required = false) String data,
@@ -191,6 +255,8 @@ public class RestService {
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         TokenFreeze freeze = new TokenFreeze();
+        freeze.setSymbol(symbol);
+        freeze.setAmount(amount);
         
         TransactionOption options = getTransacationOption(memo, source, data);
         String payload = transactionLogic.freeze(wallet, freeze, options);
@@ -202,6 +268,8 @@ public class RestService {
     public String unfreeze(
             @RequestParam(name = "name") String name,
             @RequestParam(name = "pin") Integer pin,
+            @RequestParam(name = "symbol") String symbol,
+            @RequestParam(name = "amount") String amount,
             @RequestParam(name = "memo", required = false) String memo,
             @RequestParam(name = "source", required = false) Long source,
             @RequestParam(name = "data", required = false) String data,
@@ -210,6 +278,8 @@ public class RestService {
         Wallet wallet = configuration.getWallet(name, pin, clientIp);
         
         TokenUnfreeze unfreeze = new TokenUnfreeze();
+        unfreeze.setSymbol(symbol);
+        unfreeze.setAmount(amount);
         
         TransactionOption options = getTransacationOption(memo, source, data);
         String payload = transactionLogic.unfreeze(wallet, unfreeze, options);
