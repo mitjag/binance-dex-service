@@ -57,6 +57,7 @@ public class RestService {
                 remoteAddr = request.getRemoteAddr();
             }
         }
+        log.info("remoteAddr: {}", remoteAddr);
         return remoteAddr;
     }
     

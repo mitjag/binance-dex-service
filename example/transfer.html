@@ -31,35 +31,39 @@
                     </div>
                     <div class="form-group">
                         <label for="Coin">Coin</label>
-                        <input type="text" class="form-control" id="Coin" placeholder="Enter coin">
+                        <input type="text" class="form-control" id="coin" placeholder="Enter coin">
                     </div>
                     <div class="form-group">
                         <label for="amount">Amount</label>
-                        <input type="number" class="form-control" id="amount" placeholder="Enter amount">
+                        <input type="text" class="form-control" id="amount" placeholder="Enter amount">
                     </div>
                     <div class="form-group">
-                            <label for="walletName">Wallet name</label>
-                            <input type="text" class="form-control" id="walletName" placeholder="Enter wallet name">
-                        </div>
-                        <div class="form-group">
-                                <label for="pin">Pin</label>
-                                <input type="number" class="form-control" id="pin" placeholder="Enter pin">
-                            </div>
-                                <button type="submit" id="signButton" class="btn btn-primary">Sign</button>
+                        <label for="walletName">Wallet name</label>
+                        <input type="text" class="form-control" id="walletName" placeholder="Enter wallet name">
+                    </div>
+                    <div class="form-group">
+                        <label for="pin">Pin</label>
+                        <input type="password" class="form-control" id="pin" placeholder="Enter pin">
+                    </div>
+                    <button type="submit" id="signButton" class="btn btn-primary">Sign</button>
 
                     <div class="form-group">
-                        <label for="signed">Signed value</label>
+                        <label for="signed">Signed message</label>
                         <input type="text" class="form-control" id="signed" aria-describedby="signed" readonly">
                     </div>
                     <button type="submit" id="broadcastButton" class="btn btn-danger">Broadcast</button>
+
+                    <div class="form-group">
+                        <label for="response">Response</label>
+                        <input type="text" class="form-control" id="response" aria-describedby="response" readonly">
+                    </div>
                 </form>
             </div>
         </div>
     </div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
@@ -71,17 +75,26 @@
     <script>
         $(document).ready(function () {
             $('#signButton').click(function () {
-                console.log('Sign click');
-                $('#signed').val('abc');
-                $.ajax( {url: "http://localhost:8080/..." })
-                    .then(function(data) {
-                        console.log(data);
-                    });
+                var toAddresss = $('#toAddresss').val();
+                var coin = $('#coin').val();
+                var amount = $('#amount').val();
+                var walletName = $('#walletName').val();
+                var pin = $('#pin').val();
+                $('#signed').val('');
+                $.get("http://127.0.0.1:8080/transfer", { name: walletName, pin: pin, toAddress: toAddresss, coin: coin, amount: amount }, function(data) {
+                    $('#signed').val(data);
+                });
                 return false;
             });
 
             $('#broadcastButton').click(function () {
-                console.log('Broadcast click');
+                var walletName = $('#walletName').val();
+                var pin = $('#pin').val();
+                var signed = $('#signed').val();
+                $('#signed').val('');
+                $.get("http://127.0.0.1:8080/broadcast", { name: walletName, pin: pin, payload: signed}, function(data) {
+                    $('#response').val(JSON.stringify(data));
+                });
                 return false;
             });
         });
