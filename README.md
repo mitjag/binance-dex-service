@@ -24,7 +24,7 @@ Example: java -jar binance-dex-service-1.0.0.jar --wallet.name=wallet ---wallet.
 
 Service starts on localhost port 8080 browse to URL: http://127.0.0.1:8080/
 
-Example how to use Binance DEX Signing Service
+YouTube example how to use Binance DEX Signing Service
 
 [![How to use Binance DEX Signing Service](http://img.youtube.com/vi/i1xC6DI5ias/0.jpg)](http://www.youtube.com/watch?v=i1xC6DI5ias)
 
